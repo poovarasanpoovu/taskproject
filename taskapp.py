@@ -1,6 +1,26 @@
 import time
 from datetime import datetime as d
-import os
+import os,time
+import mysql.connector
+
+import mysql.connector
+
+db_connect = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database="pythondb"
+)
+cur = db_connect.cursor()
+def table_tasks():
+ insert_task = '''
+    CREATE TABLE IF NOT EXISTS taskinsert(
+      tasks_name VARCHAR(20)
+
+    )'''
+ cur.execute(insert_task)
+#table_tasks()
+
 
 date = d.now()
 start=time.time()
@@ -14,8 +34,16 @@ RESET = '\033[0m'
 BOLD = "\033[1m"
 ITALIC = "\033[3m"
 
-print(BOLD,ITALIC,"Task Program".center(30,"*"))
+smile_emoji='\U0001F60A'
+verify_emoji ='\U0001F914'
+success_emoji='\U0001F60E'
+thanks_emoji='\U0001F64F'
+hand_emoji='\U0001F44D'
+heart_emoji='\U00002764'
+
+print(BOLD,ITALIC,f"Task Program{smile_emoji}".center(30,"*"))
 print("\rDate & time : ",date.strftime("%d/%m/%Y; %H:%M:%S %p"))
+
 user = ''
 passwords = ''
 
@@ -27,44 +55,64 @@ def add_task():
        number = int(input("How many task's will added : "))
 
    except Exception:
-       print(NEGATIVE,"Only Numeric!!!",RESET)
+       print(NEGATIVE,"Only Numeric!!!",RESET,verify_emoji)
        add_task()
    else:
        for i in range(1, number + 1):
            task = input(f"Enter the task {i}: ")
            information.append(task)
-       print("Task's added Successfully!!")
-
+           insert_task_query="INSERT INTO taskinsert VALUES (%s)"
+           cur.execute(insert_task_query,(task,))
+           db_connect.commit()
+       print("Task's added Successfully!!",smile_emoji)
+       cur.close()
+       db_connect.close()
+       task_start=time.time()
+       time.sleep(2)
 
 def view_task():
     print(BOLD,ITALIC)
     if not information:
-        print(NEGATIVE,"No Task's Found!!!",RESET)
+        print(NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
+        time.sleep(2)
     else:
        count=1
        for j in information:
           print(f"{count}: {j}".title())
           count+=1
-
+       time.sleep(2)
 def update_task():
     print(BOLD,ITALIC)
     if not information:
-        print(NEGATIVE,"No Task's Found!!!",RESET)
+        print(NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
+        time.sleep(2)
         #main(user)
     else:
         try:
           num= int(input("How many task's updated : "))
         except Exception:
-            print("Only Numeric!!!")
+            print("Only Numeric!!!",verify_emoji)
+            time.sleep(2)
             update_task()
         else:
           if num<=(len(information)):
             for i in range(0,num):
               choose = input("Please Enter task : ")
-              remove=information.remove(choose)
-              remove_list.append(choose)
+              if choose in information:
+                  remove = information.remove(choose)
+                  remove_list.append(choose)
+                  print("\n Updated Successfully!!!",smile_emoji)
+                  time.sleep(2)
+              else:
+                  print(NEGATIVE,BOLD,ITALIC,"Task Not Matched!!!",RESET,hand_emoji)
+                  print("Pending Task Is : ",end = " ")
+                  view_task()
+                  time.sleep(2)
+
+
           else:
               print(f"Please enter number is : less than ''{len(information)}'' or equal to ''{len(information)}'' ")
+              time.sleep(2)
               update_task()
 
 def complete_task():
@@ -73,7 +121,9 @@ def complete_task():
         if remove_list:
             for i in remove_list:
                 print(f"completed task is : {i} completed")
-        print(NEGATIVE,"No Task's Found!!!",RESET)
+            time.sleep(2)
+        print(NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
+        time.sleep(2)
         #main(user)
 
     else:
@@ -84,7 +134,8 @@ def complete_task():
 
 def main(user):
     count=0
-    print(f"Hi! welcome '{RED+user+RESET}'")
+    print(f"Hi! welcome '{RED+user+heart_emoji+RESET}'")
+    time.sleep(2)
     while True:
      print(BOLD,ITALIC)
      print(BLUE,"Menu's".center(30,"*"))
@@ -92,7 +143,7 @@ def main(user):
      print("2.View Task")
      print("3.Update Task ")
      print("4.Complete Task ")
-     print("5.Exit Task",RESET)
+     print("5.Sign out",RESET)
 
      try:
         count += 1
@@ -101,7 +152,7 @@ def main(user):
         print(RESET)
 
      except Exception:
-         print(NEGATIVE,"Only Numeric!!!",RESET)
+         print(NEGATIVE,"Only Numeric!!!",RESET,verify_emoji)
      else:
         if task == 1:
           add_task()
@@ -113,7 +164,7 @@ def main(user):
           complete_task()
         elif task==5:
           print(BOLD,ITALIC)
-          print("Thanks for coming!!!")
+          print("Thanks for coming!!!",smile_emoji)
           print("Using of no.of entry's this Portal count : ",count)
           with open("taskapp.py", "r") as a:
               count = 0
@@ -127,16 +178,9 @@ def main(user):
               size = os.path.getsize("taskapp.py") / 1024
               print("File size : {:.2f}KB".format(size))
               print("Execution Time : ",result_time)
-          break
+              break
 
         else:
             print(BOLD,ITALIC,NEGATIVE,"''If would like to continue this task please choose (1 To 4) numbers!!!''",RESET)
-def passwordfunction():
-    user = input("User's Name : ")
-    passwords = input("Enter Password : ")
-    if (passwords.title())=="Welcome":
-      main(user)
-    else:
-      print(NEGATIVE,"Wrong Password!!!",RESET)
-      passwordfunction()
-passwordfunction()
+            time.sleep(2)
+
