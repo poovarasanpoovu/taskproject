@@ -15,7 +15,8 @@ cur = db_connect.cursor()
 def table_tasks():
  insert_task = '''
     CREATE TABLE IF NOT EXISTS taskinsert(
-      tasks_name VARCHAR(20)
+      task_name VARCHAR(20),
+      task_time TIME
 
     )'''
  cur.execute(insert_task)
@@ -60,33 +61,34 @@ def add_task():
    else:
        for i in range(1, number + 1):
            task = input(f"Enter the task {i}: ")
-           information.append(task)
-           insert_task_query="INSERT INTO taskinsert VALUES (%s)"
-           cur.execute(insert_task_query,(task,))
+           insert_task_query="INSERT INTO taskinsert VALUES (%s,%s)"
+           cur_date=date.strftime("%H:%M:%S")
+           cur.execute(insert_task_query,(task,cur_date))
            db_connect.commit()
        print("Task's added Successfully!!",smile_emoji)
-       cur.close()
-       db_connect.close()
        task_start=time.time()
        time.sleep(2)
 
 def view_task():
     print(BOLD,ITALIC)
-    if not information:
+    cur.execute("SELECT task_name,TIME_FORMAT(task_time,'%h:%i:%s %p') FROM taskinsert")
+    result_tasks=cur.fetchall()
+    if not result_tasks:
         print(NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
         time.sleep(2)
     else:
        count=1
-       for j in information:
-          print(f"{count}: {j}".title())
+       for j in result_tasks:
+          print(f"{count}: {j[0]}  Time is :{j[1]}".title())
           count+=1
        time.sleep(2)
 def update_task():
     print(BOLD,ITALIC)
-    if not information:
+    cur.execute("SELECT task_name FROM taskinsert")
+    result_tasks = cur.fetchall()
+    if not result_tasks:
         print(NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
         time.sleep(2)
-        #main(user)
     else:
         try:
           num= int(input("How many task's updated : "))
@@ -95,46 +97,47 @@ def update_task():
             time.sleep(2)
             update_task()
         else:
-          if num<=(len(information)):
-            for i in range(0,num):
-              choose = input("Please Enter task : ")
-              if choose in information:
-                  remove = information.remove(choose)
-                  remove_list.append(choose)
-                  print("\n Updated Successfully!!!",smile_emoji)
-                  time.sleep(2)
-              else:
-                  print(NEGATIVE,BOLD,ITALIC,"Task Not Matched!!!",RESET,hand_emoji)
-                  print("Pending Task Is : ",end = " ")
-                  view_task()
-                  time.sleep(2)
+            if num<=len(result_tasks):
+              for i in range(0, num):
 
+                choose = input("Please Enter task : ")
+                for j in result_tasks:
+                  if choose in j:
+                     delete_query="DELETE FROM taskinsert where task_name=(%s)"
+                     cur.execute(delete_query,(choose,))
+                     db_connect.commit()
+                     print("\n Updated Successfully!!!", smile_emoji)
+                     remove_list.append(choose)
+                     time.sleep(2)
+                     break
 
-          else:
-              print(f"Please enter number is : less than ''{len(information)}'' or equal to ''{len(information)}'' ")
-              time.sleep(2)
-              update_task()
+                else:
+                     print(f"{NEGATIVE}Enter Correct Task's name",RESET)
+                     time.sleep(2)
+                     update_task()
+            else:
+                  print(f"Please Enter {RED}Less_than {len(result_tasks)}{RESET} (OR) {RED}{BOLD}{ITALIC}Equal_To {len(result_tasks)}{RESET}")
+                  time.sleep(2)
+                  update_task()
 
 def complete_task():
     print(BOLD,ITALIC)
-    if not information:
+    cur.execute("SELECT task_name FROM taskinsert")
+    result_tasks = cur.fetchall()
+    if not result_tasks:
         if remove_list:
             for i in remove_list:
-                print(f"completed task is : {i} completed")
-            time.sleep(2)
-        print(NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
+                print(f"completed task is :{RED}{i}{RESET}{BOLD}{ITALIC} completed{BOLD}{ITALIC}")
+        print(BOLD,ITALIC,NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
         time.sleep(2)
-        #main(user)
 
     else:
         print(NEGATIVE,"Task's Pending!!!",RESET)
         view_task()
-        for i in remove_list:
-          print(f"completed task is : ''{i}''".title())
 
 def main(user):
     count=0
-    print(f"Hi! welcome '{RED+user+heart_emoji+RESET}'")
+    print(f"{BOLD}{ITALIC}Hi! welcome '{RED+user+heart_emoji+RESET}'")
     time.sleep(2)
     while True:
      print(BOLD,ITALIC)
