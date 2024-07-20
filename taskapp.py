@@ -146,8 +146,6 @@ def complete_task():
             print(f"{count}: {j[0]}  Time is :{j[1]}".title())
             count += 1
         time.sleep(2)
-        cur.execute("DELETE FROM taskupdate")
-        db_connect.commit()
 def main(user):
     count=0
     print(f"{BOLD}{ITALIC}Hi! welcome '{RED+user+heart_emoji+RESET}'")
@@ -179,6 +177,8 @@ def main(user):
         elif task == 4:
           complete_task()
         elif task==5:
+          cur.execute("DELETE FROM taskupdate")
+          db_connect.commit()
           print(BOLD,ITALIC)
           print("Thanks for coming!!!",smile_emoji)
           print("Using of no.of entry's this Portal count : ",count)
