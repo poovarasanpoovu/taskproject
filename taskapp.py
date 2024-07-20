@@ -194,6 +194,8 @@ def main(user):
               size = os.path.getsize("taskapp.py") / 1024
               print("File size : {:.2f}KB".format(size))
               print("Execution Time : ",result_time)
+              cur.execute("DELETE FROM taskupdate")
+              db_connect.commit()
               break
 
         else:
