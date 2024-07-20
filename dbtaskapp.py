@@ -42,13 +42,15 @@ def insert_table(name,password):
         if result:
             print("")
             print(NEGATIVE,"Already Available? Please try again!!!",RESET,verify_emoji)
+            time.sleep(1)
             user_enter()
         else:
             insert_query = "INSERT INTO taskapptable (user_name,user_password) VALUES (%s, %s)"
             insert_item = (name,password)
             cursors.execute(insert_query,insert_item)
             database_connection.commit()
-            print(BOLD,ITALIC,"\nAccount Successfully Created!!!",RESET,success_emoji)
+            print(BOLD,ITALIC,"\nAccount Successfully Created!!!",RESET,success_emoji,"\n")
+            time.sleep(2)
             number=int(input(f"{BOLD}{ITALIC}If would you like to Signing Up now? Press (1) (or) Exit (2){RESET} {smile_emoji}:  "))
             if number == 1:
                checking_table(name,password)
@@ -71,6 +73,7 @@ def checking_table(name,passkey):
         taskapp.main(name)
       else:
           print(NEGATIVE,"User_name or Password wrong,Please try again!!!",RESET,verify_emoji)
+          time.sleep(2)
           user_enter()
       cursors.close()
       database_connection.close()
@@ -92,8 +95,10 @@ def user_enter():
            print("\n",NEGATIVE, "Only Numeric!!!", RESET, verify_emoji)
        else:
          if choose == 1:
+          print(BOLD,ITALIC)
           name = input("Name : ")
           password = input("Create password : ")
+          print(RESET)
           insert_table(name,password)
          elif choose == 2:
            print(BOLD,ITALIC)
