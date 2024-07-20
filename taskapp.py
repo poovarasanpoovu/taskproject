@@ -21,6 +21,14 @@ def table_tasks():
     )'''
  cur.execute(insert_task)
 #table_tasks()
+def table_update():
+    update_tasks='''
+    CREATE TABLE IF NOT EXISTS taskupdate(
+      task_name VARCHAR(20),
+      task_time time
+    )'''
+    cur.execute(update_tasks)
+#table_update()
 
 
 date = d.now()
@@ -48,9 +56,8 @@ print("\rDate & time : ",date.strftime("%d/%m/%Y; %H:%M:%S %p"))
 user = ''
 passwords = ''
 
-information =[]
-remove_list = []
 def add_task():
+
    try:
        print(BOLD,ITALIC)
        number = int(input("How many task's will added : "))
@@ -62,7 +69,8 @@ def add_task():
        for i in range(1, number + 1):
            task = input(f"Enter the task {i}: ")
            insert_task_query="INSERT INTO taskinsert VALUES (%s,%s)"
-           cur_date=date.strftime("%H:%M:%S")
+           dates = d.now()
+           cur_date=dates.strftime("%H:%M:%S")
            cur.execute(insert_task_query,(task,cur_date))
            db_connect.commit()
        print("Task's added Successfully!!",smile_emoji)
@@ -83,6 +91,7 @@ def view_task():
           count+=1
        time.sleep(2)
 def update_task():
+
     print(BOLD,ITALIC)
     cur.execute("SELECT task_name FROM taskinsert")
     result_tasks = cur.fetchall()
@@ -107,7 +116,11 @@ def update_task():
                      cur.execute(delete_query,(choose,))
                      db_connect.commit()
                      print("\n Updated Successfully!!!", smile_emoji)
-                     remove_list.append(choose)
+                     dates = d.now()
+                     dates=dates.strftime("%H:%M:%S")
+                     insert_table="INSERT INTO taskupdate VALUES(%s,%s)"
+                     cur.execute(insert_table,(choose,dates))
+                     db_connect.commit()
                      time.sleep(2)
                      break
 
@@ -122,19 +135,19 @@ def update_task():
 
 def complete_task():
     print(BOLD,ITALIC)
-    cur.execute("SELECT task_name FROM taskinsert")
+    cur.execute("SELECT task_name,TIME_FORMAT(task_time,'%h:%i:%s %p') FROM taskupdate")
     result_tasks = cur.fetchall()
     if not result_tasks:
-        if remove_list:
-            for i in remove_list:
-                print(f"completed task is :{RED}{i}{RESET}{BOLD}{ITALIC} completed{BOLD}{ITALIC}")
-        print(BOLD,ITALIC,NEGATIVE,"No Task's Found!!!",RESET,hand_emoji)
+        print(BOLD, ITALIC, NEGATIVE, "No Task's Found!!!", RESET, hand_emoji)
         time.sleep(2)
-
     else:
-        print(NEGATIVE,"Task's Pending!!!",RESET)
-        view_task()
-
+        count = 1
+        for j in result_tasks:
+            print(f"{count}: {j[0]}  Time is :{j[1]}".title())
+            count += 1
+        time.sleep(2)
+        cur.execute("DELETE FROM taskupdate")
+        db_connect.commit()
 def main(user):
     count=0
     print(f"{BOLD}{ITALIC}Hi! welcome '{RED+user+heart_emoji+RESET}'")
